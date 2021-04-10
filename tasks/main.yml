@@ -1,0 +1,33 @@
+---
+- name: Add ansible user
+  ansible.builtin.user:
+    name: ansible
+    shell: /bin/bash
+    groups: sudo
+    append: yes
+- name: Set ansible user authorized_keys
+  ansible.posix.authorized_key:
+    user: ansible
+    state: present
+    key: "{{ ssh_deploy_key }}"
+- name: allow ansible to use sudo with NOPASSWD
+  lineinfile:
+    path: /etc/sudoers
+    state: present
+    regexp: '^ansible ALL='
+    line: "{{ ansible_sudoers_config }}"
+    validate: '/usr/sbin/visudo -cf %s'
+- name: disable ssh as root
+  lineinfile:
+    path: /etc/ssh/sshd_config
+    state: present
+    regexp: '^\#?PermitRootLogin yes'
+    line: 'PermitRootLogin no'
+- name: Disable root password
+  user:
+    name: root
+    password: '!'
+- name: restart ssh server
+  ansible.builtin.systemd:
+    name: sshd
+    state: restarted

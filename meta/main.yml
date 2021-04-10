@@ -1,4 +1,0 @@
----
-dependencies:
-#  - { role: ansible.posix.authorized_key }
-#  - { role: community.general.passwordstore }
