@@ -5,11 +5,14 @@
     shell: /bin/bash
     groups: sudo
     append: yes
+  ignore_unreachable: yes
+  register: connectivity
 - name: Set ansible user authorized_keys
   ansible.posix.authorized_key:
     user: ansible
     state: present
     key: "{{ ssh_deploy_key }}"
+  when: connectivity.skip_reason is not defined
 - name: allow ansible to use sudo with NOPASSWD
   lineinfile:
     path: /etc/sudoers
@@ -17,14 +20,17 @@
     regexp: '^ansible ALL='
     line: "{{ ansible_sudoers_config }}"
     validate: '/usr/sbin/visudo -cf %s'
+  when: connectivity.skip_reason is not defined
 - name: disable ssh as root
   lineinfile:
     path: /etc/ssh/sshd_config
     state: present
     regexp: '^\#?PermitRootLogin yes'
     line: 'PermitRootLogin no'
+  when: connectivity.skip_reason is not defined
   notify: [ restart ssh server ]
 - name: Disable root password
   user:
     name: root
     password: '!'
+  when: connectivity.skip_reason is not defined
