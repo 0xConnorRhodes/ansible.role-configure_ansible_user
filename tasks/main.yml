@@ -14,10 +14,11 @@
     key: "{{ ssh_deploy_key }}"
   when: connectivity.skip_reason is not defined
 - name: allow ansible to use sudo with NOPASSWD
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /etc/sudoers
     state: present
     regexp: '^ansible ALL='
+    insertafter: EOF # inserts line at the end of the file
     line: "{{ ansible_sudoers_config }}"
     validate: '/usr/sbin/visudo -cf %s'
   when: connectivity.skip_reason is not defined
