@@ -8,4 +8,4 @@
 4. make sure the ansible user can access it's own authorized keys file
 
 ### misc:
-- depends on the gnu pass thing
+- depends on password-store
